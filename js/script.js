@@ -25,37 +25,65 @@ var catObject = {
         "numClick": 0,
     }
 }
+var octopus = {
+    init: function() {
+        //call model and view
+        view.init();
 
-for (i = 1; i <= Object.keys(catObject).length; i++) {
-    var catIndex = 'cat_' + i;
-    var catName = catObject[catIndex]['name'];
-    var catImage = catObject[catIndex]['image'];
-    var catClick = catObject[catIndex]['numClick'];
-    var navmenu = '<a href="#' + catIndex + '" onclick="return showContent(' + "'" + catIndex + "'" + ');">' + catName + '</a>'
-    var divbody = '<div id="' + catIndex + '" style="display:none"><h3> Current Number of clicks for ' + catName + '</h3> <h3 id="click' + catIndex + '">' + catClick + '</h3><div class="pic"><img id="img' + catIndex + '" src="' + catImage + '"></div > </div>';
-    $("#sidenav:last").append(navmenu);
-    $(".main:last").append(divbody);
-}
+    },
+    getNav: function() {
+        //loop through nav and build dom
+        //call view to push dom
+        var navmenu = [];
+        for (i = 1; i <= Object.keys(catObject).length; i++) {
+            var catIndex = 'cat_' + i;
+            var catName = catObject[catIndex]['name'];
+            navmenu.push('<a id="catmenu" href="#' + catIndex + '" onclick="return view.render(' + "'" + catIndex + "'" + ');">' + catName + '</a>')
+        }
+        return navmenu;
+    },
+    getSelectedCat: function(content) {
+        //return cat, build dom, call view
+        this.catlist = $("#catmenu");
+        var catName = catObject[content]['name'];
+        var catImage = catObject[content]['image'];
+        var catClick = catObject[content]['numClick'];
 
+        //build dom
+        var divbody = '<div id="' + content + '" style="display:block"><h3> Current Number of clicks for ' + catName + '</h3> <h3 id="click' + content + '">' + catClick + '</h3><div class="pic"><img id="img' + content + '" onclick="return view.update(' + "'" + content + "'" + ')" src="' + catImage + '" ></div > </div>';
+        return divbody;
+    },
+    increaseCounter: function(content) {
+        //click function, call view
+        if (content in catObject) {
+            catObject[content]['numClick'] = catObject[content]['numClick'] + 1
 
-function showContent(content) {
-    for (i = 1; i <= Object.keys(catObject).length; i++) {
-        var catIndex = 'cat_' + i;
-        document.getElementById(catIndex).style.display = 'none';
+        } else { console.log("No key returned") }
+        return catObject[content]['numClick'];
     }
-    document.getElementById(content).style.display = 'block';
+
 }
 
-$("img").click(function() {
-    var clickedBtnID = $(this).attr('id'); // or var clickedBtnID = this.id
-    //alert('you clicked on button #' + clickedBtnID);
-    var nameSplit = clickedBtnID.split("_");
-    var catIndex = 'cat_' + nameSplit[1];
-    var catClickID = 'click' + catIndex
-    if (catIndex in catObject) {
-        catObject[catIndex]['numClick'] = catObject[catIndex]['numClick'] + 1
-        document.getElementById(catClickID).innerHTML = catObject[catIndex]['numClick'];
-    } else { console.log("No key returned") }
+var view = {
+    init: function() {
+        //nav
+        var navmenu = octopus.getNav();
+        $("#sidenav:last").append(navmenu);
+        //view.render();
+    },
+    render: function(selectedCat) {
+        //div for selected cat
+        var divbody = octopus.getSelectedCat(selectedCat);
+        $(".catdisplay").html('');
+        $(".catdisplay").append(divbody);
+    },
+    update: function(selectedCat) {
+        //update counter??
+        var catClickID = 'click' + selectedCat
+        var catClick = octopus.increaseCounter(selectedCat);
+        document.getElementById(catClickID).innerHTML = catClick;
+    }
 
+};
 
-});
+octopus.init();
